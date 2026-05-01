@@ -1,31 +1,35 @@
-name: Auto Build Test
+name: Build HsMod
 
 on:
-  push:
-    branches: [ "bepinex5" ]
-  pull_request:
-  merge_group:
+  workflow_dispatch: 
 
 jobs:
   build:
     runs-on: windows-latest
+    
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-    # Checkout the repository
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
-        fetch-depth: 0
-    
-    # Setup .NET SDK
+        ref: bepinex5
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x
-    
-    # Restore dependencies
+        dotnet-version: '8.x'
+
     - name: Restore dependencies
-      run: dotnet restore --locked-mode
-    
-    # Build the project
-    - name: Build HsMod
+      run: dotnet restore
+
+    - name: Build Project
       run: dotnet build --configuration Release --no-restore
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: HsMod-Release
+        # 更新为准确的路径
+        path: HsMod/Release/HsMod.dll
