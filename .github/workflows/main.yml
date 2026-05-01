@@ -1,38 +1,31 @@
-name: Build HsMod
+name: Auto Build Test
 
 on:
-  workflow_dispatch: 
+  push:
+    branches: [ "bepinex5" ]
+  pull_request:
+  merge_group:
 
 jobs:
   build:
-    # 核心修改：将 ubuntu-latest 改为 windows-latest
     runs-on: windows-latest
-    
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    # Checkout the repository
+    - uses: actions/checkout@v4
       with:
-        ref: bepinex5
-
+        fetch-depth: 0
+    
+    # Setup .NET SDK
     - name: Setup .NET
-      # 虽然项目是 4.8，但我们仍保留 .NET 8 SDK，因为它包含了最新的编译工具链
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.x'
-
+        dotnet-version: 8.x
+    
+    # Restore dependencies
     - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build Project
-      # 移除 --no-restore 确保在 Windows 上重新拉取必要的依赖
-      run: dotnet build --configuration Release
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: HsMod-Release
-        # 使用通配符搜索，这样无论它生成在哪个 bin 文件夹下都能抓取到
-        path: "**/bin/Release/**/HsMod.dll"
+      run: dotnet restore --locked-mode
+    
+    # Build the project
+    - name: Build HsMod
+      run: dotnet build --configuration Release --no-restore
