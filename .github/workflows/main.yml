@@ -1,19 +1,24 @@
 name: Build HsMod
 
 on:
-  workflow_dispatch: # 允许手动点击按钮触发编译
+  workflow_dispatch: 
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # 核心修改：将 ubuntu-latest 改为 windows-latest
+    runs-on: windows-latest
+    
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        ref: bepinex5 # 官方说明中目前的主力分支
+        ref: bepinex5
 
-    - name: Setup .NET 8.x
+    - name: Setup .NET
+      # 虽然项目是 4.8，但我们仍保留 .NET 8 SDK，因为它包含了最新的编译工具链
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.x'
@@ -22,10 +27,12 @@ jobs:
       run: dotnet restore
 
     - name: Build Project
-      run: dotnet build --configuration Release --no-restore
+      # 移除 --no-restore 确保在 Windows 上重新拉取必要的依赖
+      run: dotnet build --configuration Release
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: HsMod-Release
-        path: ./HsMod/Release/HsMod.dll # 提取编译好的 dll 文件
+        # 使用通配符搜索，这样无论它生成在哪个 bin 文件夹下都能抓取到
+        path: "**/bin/Release/**/HsMod.dll"
