@@ -24,12 +24,14 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build Project
+    - name: Build HsMod
       run: dotnet build --configuration Release --no-restore
 
+    # === 就是少了下面这一段，请务必加上 ===
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: HsMod-Release
-        # 更新为准确的路径
+        # 根据你日志里的路径：D:\a\HsMod\HsMod\HsMod\Release\HsMod.dll
+        # 对应相对路径如下：
         path: HsMod/Release/HsMod.dll
