@@ -1,0 +1,31 @@
+name: Build HsMod
+
+on:
+  workflow_dispatch: # 允许手动点击按钮触发编译
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: bepinex5 # 官方说明中目前的主力分支
+
+    - name: Setup .NET 8.x
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build Project
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: HsMod-Release
+        path: ./HsMod/Release/HsMod.dll # 提取编译好的 dll 文件
