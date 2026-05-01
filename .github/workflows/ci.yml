@@ -1,37 +1,31 @@
-name: Build HsMod
+name: Auto Build Test
 
 on:
-  workflow_dispatch: 
+  push:
+    branches: [ "bepinex5" ]
+  pull_request:
+  merge_group:
 
 jobs:
   build:
     runs-on: windows-latest
-    
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    # Checkout the repository
+    - uses: actions/checkout@v4
       with:
-        ref: bepinex5
-
+        fetch-depth: 0
+    
+    # Setup .NET SDK
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.x'
-
+        dotnet-version: 8.x
+    
+    # Restore dependencies
     - name: Restore dependencies
-      run: dotnet restore
-
+      run: dotnet restore --locked-mode
+    
+    # Build the project
     - name: Build HsMod
       run: dotnet build --configuration Release --no-restore
-
-    # === 就是少了下面这一段，请务必加上 ===
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: HsMod-Release
-        # 根据你日志里的路径：D:\a\HsMod\HsMod\HsMod\Release\HsMod.dll
-        # 对应相对路径如下：
-        path: HsMod/Release/HsMod.dll
